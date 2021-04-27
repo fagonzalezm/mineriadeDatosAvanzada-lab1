@@ -1,6 +1,7 @@
 require(mclust)
 require(reshape2)
 require(ggplot2)
+require(corrplot)
 
 ######### Se carga la base de datos #########
 names <- c("id", "clumpThickness", "uniformityOfCellSize", "uniformityOfCellShape",
@@ -95,6 +96,13 @@ p <- p + geom_bar()
 p <- p + facet_wrap( ~ variable, scales="free")
 p
 
+#Ninguna sigue una distribuición normal, se opta por un test no paramétrico
+data$bareNuclei <- as.numeric(data$bareNuclei)
+data.cor = cor(data, method = 'spearman')
+
+corrplot(data.cor, method = 'ellipse')
+title("Matriz de Correlacion")
+
 
 features <- data[,2:10]
 class <- data$class
@@ -149,12 +157,10 @@ table(class, mod12$classification) #distribuci?n de clases por cada grupo.
 features <- data[,2:9]
 class <- data$class
 
-
 #BIC
 BIC<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1))
 plot(BIC)  #se grafican los BIC por configuraci?n de par?metros
 summary(BIC)  # se presentan los mejores valores BIC
-
 
 #Usando VVV,3
 mod11=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
