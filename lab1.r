@@ -96,7 +96,7 @@ p <- p + facet_wrap( ~ variable, scales="free")
 p
 
 
-features <- data[,1:9]
+features <- data[,2:10]
 class <- data$class
 
 
@@ -122,6 +122,40 @@ BIC<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrin
 plot(BIC)  #se grafican los BIC por configuraci?n de par?metros
 summary(BIC)  # se presentan los mejores valores BIC
 
+#Usando VVV,4
+mod11=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
+summary(mod11)#se muestra resultado y tabla de clustering
+
+#Graficando
+plot(mod11, what = "classification")  #se grafica la configuraci?n de agrupamientos.
+legend("bottomright", legend = 1:4,
+       col = mclust.options("classPlotColors"),
+       pch = mclust.options("classPlotSymbols"),title = "Class labels:")
+
+table(class, mod11$classification) #distribuci?n de clases por cada grupo.
+
+
+#Usando segundo mejor BIC
+mod12 = Mclust(features, G=5, prior = priorControl(functionName="defaultPrior", shrinkage=0.1), modelNames ="VVI")  
+plot(mod12, what = "classification")  #se grafica la configuraci?n de agrupamientos.
+legend("bottomright", legend = 1:5,
+       col = mclust.options("classPlotColors"),
+       pch = mclust.options("classPlotSymbols"),title = "Class labels:")
+table(class, mod12$classification) #distribuci?n de clases por cada grupo.
+
+
+
+#Quitando la variable mitosis.
+features <- data[,2:9]
+class <- data$class
+
+
+#BIC
+BIC<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1))
+plot(BIC)  #se grafican los BIC por configuraci?n de par?metros
+summary(BIC)  # se presentan los mejores valores BIC
+
+
 #Usando VVV,3
 mod11=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
 summary(mod11)#se muestra resultado y tabla de clustering
@@ -133,12 +167,3 @@ legend("bottomright", legend = 1:3,
        pch = mclust.options("classPlotSymbols"),title = "Class labels:")
 
 table(class, mod11$classification) #distribuci?n de clases por cada grupo.
-
-
-#Usando otros valores
-mod12 = Mclust(features, G=7, prior = priorControl(functionName="defaultPrior", shrinkage=0.1), modelNames ="VVI")  
-plot(mod12, what = "classification")  #se grafica la configuraci?n de agrupamientos.
-legend("bottomright", legend = 1:7,
-       col = mclust.options("classPlotColors"),
-       pch = mclust.options("classPlotSymbols"),title = "Class labels:")
-table(class, mod12$classification) #distribuci?n de clases por cada grupo.
