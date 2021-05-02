@@ -66,9 +66,20 @@ p
 # Se observa que para todas las variables existe una relación entre sus valores
 # y si la célula corresponde a una cancerosa o no, excepto con mitoses.
 
-#summary(features)
-#var(features)
-#by(features, features$class, summary)
+# Estadistica descriptiva
+# meadias
+means <- sapply(features[, 1:9], mean)
+
+# medianas
+medians <- sapply(features[, 1:9], median)
+
+#varianzas
+vars <- sapply(features[, 1:9], var)
+
+#coeficientes de variacion
+coefs <- sqrt(vars)/means
+
+
 
 ####### Test de normalidad #######
 # H0: La muestra sigue una distribución normal
