@@ -3,6 +3,9 @@ require(reshape2)
 require(ggplot2)
 require(corrplot)
 
+library(cluster)
+library(factoextra)
+
 ######### Se carga la base de datos #########
 names <- c("id", "clumpThickness", "uniformityOfCellSize", "uniformityOfCellShape",
            "marginalAdhesion", "singleEpithelialCellSize", "bareNuclei",
@@ -79,6 +82,10 @@ vars <- sapply(features[, 1:9], var)
 #coeficientes de variacion
 coefs <- sqrt(vars)/means
 
+means
+medians
+vars
+coefs
 
 
 ####### Test de normalidad #######
@@ -121,51 +128,10 @@ class <- data$class
 
 ################mclust######################
 
-#primer intento
 
-mod1 = Mclust(features) #DEFAULT
-summary(mod1)
-
-#segundo intento
-mod2 = Mclust(features, G = 3)  #Numero de grupos = 3.
-summary(mod2, parameters = TRUE)
-
-#tercer intento
-#mod6 = Mclust(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1), modelNames ="EII")  
-#"EII" = spherical, equal volume # Using prior #The function priorControl is used to specify a conjugate prior for EM within MCLUST. 
-#summary(mod6,parameter = TRUE)
-#plot(mod6, what = "classification")
-
-#BIC
-BIC<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1))
-plot(BIC)  #se grafican los BIC por configuraci?n de par?metros
-summary(BIC)  # se presentan los mejores valores BIC
-
-#Usando VVV,4
-mod11=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
-summary(mod11)#se muestra resultado y tabla de clustering
-
-#Graficando
-plot(mod11, what = "classification")  #se grafica la configuraci?n de agrupamientos.
-legend("bottomright", legend = 1:4,
-       col = mclust.options("classPlotColors"),
-       pch = mclust.options("classPlotSymbols"),title = "Class labels:")
-
-table(class, mod11$classification) #distribuci?n de clases por cada grupo.
-
-
-#Usando segundo mejor BIC
-mod12 = Mclust(features, G=5, prior = priorControl(functionName="defaultPrior", shrinkage=0.1), modelNames ="VVI")  
-plot(mod12, what = "classification")  #se grafica la configuraci?n de agrupamientos.
-legend("bottomright", legend = 1:5,
-       col = mclust.options("classPlotColors"),
-       pch = mclust.options("classPlotSymbols"),title = "Class labels:")
-table(class, mod12$classification) #distribuci?n de clases por cada grupo.
-
-
-
-#Quitando la variable mitosis.
-features <- data[,2:9]
+#Quitando la variable shape.
+features <- data[,2:10]
+features <- features[, -3]
 class <- data$class
 
 #BIC
@@ -173,14 +139,53 @@ BIC<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrin
 plot(BIC)  #se grafican los BIC por configuraci?n de par?metros
 summary(BIC)  # se presentan los mejores valores BIC
 
-#Usando VVV,3
-mod11=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
-summary(mod11)#se muestra resultado y tabla de clustering
+#Best BIC values:
+#  VVI,9       VVI,8       VVI,7
+#BIC      -12747.68 -13390.6688 -13409.6683
+#BIC diff      0.00   -642.9912   -661.9907
+
+#Quitando la variable size.
+features <- data[,2:10]
+features <- features[, -2]
+class <- data$class
+
+#BIC
+BIC2<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1))
+plot(BIC2)  #se grafican los BIC por configuraci?n de par?metros
+summary(BIC2)  # se presentan los mejores valores BIC
+
+#Best BIC values:
+#  VVI,8        VVI,9       VVV,5
+#BIC      -13382.17 -13425.72389 -13574.5108
+#BIC diff      0.00    -43.55636   -192.3433
+
+
+# Se puede observar que se obtiene un mejor BIC sacando la variable shape,
+# por lo que se opta por sacar esta variable.
+
+
+mod=Mclust(features,x=BIC) # en base al mejor valor BIC se realiza el mclust
+summary(mod)#se muestra resultado y tabla de clustering
 
 #Graficando
-plot(mod11, what = "classification")  #se grafica la configuraci?n de agrupamientos.
-legend("bottomright", legend = 1:3,
+plot(mod, what = "classification")  #se grafica la configuraci?n de agrupamientos.
+legend("bottomright", legend = 1:9,
        col = mclust.options("classPlotColors"),
        pch = mclust.options("classPlotSymbols"),title = "Class labels:")
 
-table(class, mod11$classification) #distribuci?n de clases por cada grupo.
+table(class, mod$classification) #distribuci?n de clases por cada grupo.
+
+
+
+diss.matrix = daisy(features, metric = "euclidean",stand = FALSE)
+
+clusters = pam(diss.matrix,2,diss=TRUE, metric="euclidean")
+
+summary(clusters)
+
+clusplot(clusters)
+
+
+
+
+
