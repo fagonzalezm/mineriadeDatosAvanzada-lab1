@@ -3,6 +3,7 @@ require(reshape2)
 require(ggplot2)
 require(corrplot)
 
+require(ggpubr)
 library(cluster)
 library(factoextra)
 
@@ -63,6 +64,7 @@ features.melt <- melt(features, id.var = "class")
 p <- ggplot(data = features.melt, aes(x=variable, y=value))
 p <- p +  geom_boxplot(aes(color=class))
 p <- p + geom_jitter(aes(color=class), alpha=0.2, size=0.5)
+p <- p + scale_color_manual(values=c("#00FF00", "#FF0000"))
 p <- p + facet_wrap( ~ variable, scales="free")
 p
 
@@ -114,16 +116,47 @@ p <- p + geom_bar()
 p <- p + facet_wrap( ~ variable, scales="free")
 p
 
-#Ninguna sigue una distribuición normal, se opta por un test no paramétrico
+#Ninguna sigue una distribuici?n normal, se opta por un test no param?trico
 data$bareNuclei <- as.numeric(data$bareNuclei)
 data.cor = cor(data, method = 'spearman')
-
+data.cor
 corrplot(data.cor, method = 'ellipse')
+
+data$bareNuclei <- as.numeric(data$bareNuclei)
+data.cor = cor(data[,2:10], method = 'kendall')
+data.cor
+corrplot.mixed(data.cor, upper = "ellipse", diag="u", tl.pos="lt", order="hclust", hclust.method="median")
+
+
+#corrplot(data.cor, order="hclust", type= "full", tl.pos="tp", method = "ellipse", diag=TRUE, hclust.method="median", addrect=7, rect.col="black")
+#corrplot(data.cor, add=TRUE, type="lower", method="number", order = "hclust", col="black", diag=FALSE, tl.pos="n", cl.pos="n", hclust.method="median", addrect=1)
+
 title("Matriz de Correlacion")
 
+features.melt <- melt(features, id.var = "mitoses")
+p <- ggplot(data = features.melt, aes(x=mitoses, y=value))
+p <- p + geom_jitter(aes(group=value))
+p <- p + facet_wrap( ~ variable, scales="free")
+p
 
+
+features.class <- data[,2:11]
 features <- data[,2:10]
 class <- data$class
+
+###### Se realiza un test ANOVA one-way no paramÃ©trico ######
+
+#Mann-Whitney U test
+wilcox.test(clumpThickness ~ class, data = features.class, exact=FALSE)
+wilcox.test(uniformityOfCellSize ~ class, data = features.class, exact=FALSE)
+wilcox.test(uniformityOfCellShape ~ class, data = features.class, exact=FALSE)
+wilcox.test(marginalAdhesion ~ class, data = features.class, exact=FALSE)
+wilcox.test(singleEpithelialCellSize ~ class, data = features.class, exact=FALSE)
+wilcox.test(bareNuclei ~ class, data = features.class, exact=FALSE)
+wilcox.test(blandChromatin ~ class, data = features.class, exact=FALSE)
+wilcox.test(normalNucleoli ~ class, data = features.class, exact=FALSE)
+wilcox.test(mitoses ~ class, data = features.class, exact=FALSE)
+
 
 
 ################mclust######################
