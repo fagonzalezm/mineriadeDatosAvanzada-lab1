@@ -128,6 +128,19 @@ class <- data$class
 
 ################mclust######################
 
+# Todos los atributos
+features <- data[,2:10]
+class <- data$class
+
+#BIC
+BIC0<-mclustBIC(features, prior = priorControl(functionName="defaultPrior", shrinkage=0.1))
+plot(BIC0)  #se grafican los BIC por configuraci?n de par?metros
+summary(BIC0)  # se presentan los mejores valores BIC
+
+#Best BIC values:
+#  VVV,4       VVV,5       VVV,6
+#BIC      -14454.87 -14674.2432 -15026.5660
+#BIC diff      0.00   -219.3686   -571.6914
 
 #Quitando la variable shape.
 features <- data[,2:10]
@@ -175,6 +188,10 @@ legend("bottomright", legend = 1:9,
 
 table(class, mod$classification) #distribuci?n de clases por cada grupo.
 
+plot(mod,what = "classification")
+legend("bottomright", legend = 1:9, #numero de clusters de mod6
+       col = mclust.options("classPlotColors"),
+       pch = mclust.options("classPlotSymbols"),title = "Grupos")
 
 
 diss.matrix = daisy(features, metric = "euclidean",stand = FALSE)
@@ -184,8 +201,3 @@ clusters = pam(diss.matrix,2,diss=TRUE, metric="euclidean")
 summary(clusters)
 
 clusplot(clusters)
-
-
-
-
-
