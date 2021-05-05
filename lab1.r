@@ -226,11 +226,3 @@ legend("bottomright", legend = 1:9, #numero de clusters de mod6
        col = mclust.options("classPlotColors"),
        pch = mclust.options("classPlotSymbols"),title = "Grupos")
 
-
-diss.matrix = daisy(features, metric = "euclidean",stand = FALSE)
-
-clusters = pam(diss.matrix,2,diss=TRUE, metric="euclidean")
-
-summary(clusters)
-
-clusplot(clusters)
